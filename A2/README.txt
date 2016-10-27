@@ -1,9 +1,6 @@
 Pre-Requisites:
 -------------------
 
-Extract Singh_Mehta_A2.tar.gz and Navigate to the folder "Singh_Mehta_A2" containing the Makefile.
-
-
 I. To run locally on Linux
 
 ** Make sure HADOOP_CLASSPATH is set correctly before running command.
