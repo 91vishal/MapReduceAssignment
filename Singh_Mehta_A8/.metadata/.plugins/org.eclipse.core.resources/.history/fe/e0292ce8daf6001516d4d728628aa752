@@ -1,0 +1,54 @@
+
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.sql.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+
+public class WebClient implements Serializable{
+
+	public static void main(String[] args) throws IOException, ClassNotFoundException {
+
+		ArrayList<String> clientIp = new ArrayList<String>();
+		ArrayList<FileData> al = new ArrayList<FileData>();
+		// Read from the file and  add IPs of the instance here.
+		/*clientIp.add("192.168.56.1");
+		clientIp.add("192.168.173.198");*/
+		clientIp.add("192.168.173.126");
+		
+		ArrayList[] lists=new ArrayList[clientIp.size()];
+		TextSocket[] conn = new TextSocket[clientIp.size()];
+		ArrayList<FileData> nu=(ArrayList<FileData>)SampleSort2.buildData();
+		for(int i = 0; i < clientIp.size();i++){
+			ArrayList<FileData> data=new ArrayList<FileData>();
+			lists[i]=data;
+			
+			conn[i] = new TextSocket(clientIp.get(i), 4003);
+			System.out.println("In to connection with server");
+			conn[i].putOb(nu);
+
+		}
+		System.out.println("Done putting object");
+		int counter=0;
+		while(counter<clientIp.size()){
+			for(int i=0;i<conn.length;i++){
+				if(lists[i].size()==0){
+					System.out.println("------> In client");
+					ArrayList<FileData> datas=(ArrayList<FileData>)conn[i].getOb();
+					System.out.println("in data   --------> "+datas);
+					lists[i].add(datas);
+					counter++;
+				}
+		}
+		}
+		
+		for(int i=0;i<conn.length;i++){
+			al.addAll(lists[i]);
+			//conn[i].close();
+		}
+		System.out.println("Hello all "+al);
+	} 
+}
+

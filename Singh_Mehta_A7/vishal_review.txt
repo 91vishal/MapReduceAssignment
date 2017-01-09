@@ -1,0 +1,5 @@
+They could have updated the author name to include both of them in Prediction code, as mentioned in the report.
+The getAttributes() function which is common while Training and classifying the model, could have been reused instead of writing it twice.
+Few Syso statements could have been removed from the code.
+There are three jobs(training, testing and request) being run in Routing program which we believe, could have been optimized by writing sequential java programs.
+ 

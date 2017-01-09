@@ -1,0 +1,10 @@
+#!/bin/bash
+
+BUCKET="cs6240-viha"
+for key in `aws s3 ls s3://$BUCKET/input/`
+do
+  echo $key
+  #aws s3 cp s3://$BUCKET/$key - | md5sum
+done
+
+#aws s3 ls s3://cs6240-viha/input

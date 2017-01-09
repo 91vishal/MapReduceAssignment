@@ -1,0 +1,111 @@
+
+TERMINATE INSTANCES
+aws ec2 terminate-instances --instance-ids "i-9a301d5d"
+
+
+RUN INSTANCE:
+
+aws ec2 run-instances --image-id ami-13988772 --count 2 --instance-type m3.medium --key-name EC2_KP --security-groups my-sg
+
+m3 medium, us west
+latest:  	ami-13988772 
+
+CREATE SECURITY GROUP:
+{
+    "GroupId": "sg-63621604"
+}
+
+aws ec2 create-security-group --group-name my-sg --description "My security group"
+
+CREATE KEY PAIR:
+aws ec2 create-key-pair --key-name MyKeyPair
+
+
+instance id:i-9a301d5d
+public DNS: ec2-52-36-115-173.us-west-2.compute.amazonaws.com
+ec2-52-36-12-22.us-west-2.compute.amazonaws.com
+
+public IP:129.10.18.114
+
+
+DESCRIBE instances
+aws ec2 describe-instances --filters "Name=instance-type,Values=m3.medium"
+
+chmod 0400 EC2_KP.pem
+
+SSH:
+
+ssh -i EC2_KP.pem ec2-user@ec2-52-36-80-20.us-west-2.compute.amazonaws.com
+
+
+
+file transfer:
+scp -i EC2_KP.pem S3Utils.jar ec2-user@ec2-52-38-94-189.us-west-2.compute.amazonaws.com:~/input
+
+
+#install java on ec2 (ubuntu)
+sudo add-apt-repository ppa:webupd8team/java
+sudo apt-get update
+sudo apt-get install oracle-java7-installer
+
+#then need to press Y somehow!!
+Y
+
+#and then enter twice!!!
+enter
+enter
+
+#setting the key and variables
+sudo apt-get install oracle-java7-set-default
+
+
+#install java on ec2(redhat)
+sudo yum install java-1.7.0-openjdk java-1.7.0-openjdk-devel -y
+export JAVA_HOME=/usr/lib/jvm/jre-1.7.0-openjdk.x86_64
+
+Read JSON
+value=($(jq -r '.key1' jsonFile))
+jq '.Instances[0].State.Name' multipleinstances.json -> read state of instance
+
+jq '.Instances[0].PublicDnsName' multipleinstances.json -> public DNS name
+
+
+$ echo "${value[@]}"
+aaaa bbbb
+
+$ echo "${value[0]}"
+aaaa
+
+$ echo "${value[1]}"
+bbbb
+
+
+
+
+stop instance;
+for (( i=0; i<${tLen}; i++ ));
+do
+	echo ${instance_idArray[i]}
+	aws ec2 terminate-instances --instance-ids ${instance_idArray[i]}
+	echo "in loop"
+done
+
+
+
+#ami-13988772--medium
+#ami-c229c0a2-t2.medium
+#create security group
+#aws ec2 create-security-group --group-name my-sg --description "My security group"
+
+#CREATE KEY PAIR:
+#aws ec2 create-key-pair --key-name EC2_KP
+
+
+
+#copying from s3 to ec2
+aws s3 cp --recursive s3://cs6240-viha/input ~/input2   
+
+count files in directory: ls -l | grep -v ^l | wc -l
+
+
+Attach fullaccess policy to ec2

@@ -1,0 +1,252 @@
+package com.mapreduce.routing;
+
+import java.io.ByteArrayOutputStream;
+
+/**
+ * @author Harshali Singh
+ *
+ */
+
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.util.Tool;
+import org.apache.hadoop.util.ToolRunner;
+
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.classifiers.Classifier;
+import weka.classifiers.bayes.NaiveBayes;
+import weka.core.Attribute;
+import weka.core.DenseInstance;
+
+
+public class Routing extends Configured implements Tool {
+	
+	//CONSTANTS
+	final static int FOUR = 4;
+	static String SEPARATOR = "\t";
+	final static SimpleDateFormat form = new SimpleDateFormat("yyyy-MM-dd");
+	
+	
+	public static class RoutingMapper extends Mapper<Object, Text, Text, FlightWritable> {
+		
+		@Override
+		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+				
+				//Split the record
+				String line = value.toString();
+				String newLine = line.replaceAll("\"", "");
+				String formattedLine = newLine.replaceAll(", ", ":");
+				String[] row = formattedLine.split(",");
+
+				//Check if the flight passed sanity test.
+				if (FlightUtils.sanityTest(row)) {
+					
+					Flight flight = FlightParser.getFlightData(row);
+					
+					try{
+						
+						String year = flight.getYear();
+						String month = flight.getMonth();
+						int dayOfMonth = flight.getDayOfMonth();
+						int dayOfWeek = flight.getDayOfWeek();
+						String carrier = flight.getCarrier();
+						int flightNum = flight.getFlightNum();
+						int originId = flight.getOriginAirportId();
+						int destId = flight.getDestAirportId();
+						int crsDepartureTime = flight.getCrsDepartureTime();
+						int crsArrivalTime = flight.getCrsArrivalTime();
+						//int delay = flight.getArrivalDelayMinutes() > 0 ? 1:0;
+						Date date = convertToDate(flight.getFlightDate());
+						//int daysToHoliday = FlightUtils.closerDate(date, FlightUtils.getHolidays(date));
+						//boolean holiday = (daysToHoliday < 3)? true:false;
+						
+						
+						Text mapperOutKey = createKey(year, month);
+						FlightWritable flightModel = new FlightWritable(dayOfMonth, dayOfWeek, carrier,
+			                                                            flightNum, originId, destId, crsDepartureTime, crsArrivalTime);
+						// taking month and year as the key
+						context.write(mapperOutKey, flightModel); 
+					} catch (ParseException | NumberFormatException | ArrayIndexOutOfBoundsException e) {}
+					
+					
+					
+				}
+			
+			}
+			
+		/** Method to Create Mapper output Key
+		 *  @param   String    carrier code, year, airport code
+		 *  @return  String    Mapper output Key
+		 */
+		private Text createKey(String year, String month) {
+			Text returnKey = null;
+			if (!year.isEmpty() && !month.isEmpty()) {
+				returnKey = new Text(year + SEPARATOR + month);
+			}
+			return returnKey;
+		}
+		
+		
+		/**
+		 * @param d
+		 * Method takes string date and parses it to yyyy-MM-dd format
+		 * */
+		private static Date convertToDate(String d) throws ParseException {
+			Date date = null;
+			if(!d.isEmpty()){
+				
+				date = form.parse(d);
+			}
+			return date;
+		}
+		
+	}
+	
+	public static class RoutingReducer extends Reducer<Text, FlightWritable, Text, Text>{
+		
+		public void reduce(Text key, Iterable<FlightWritable> flights, Context context) throws IOException, InterruptedException{
+			
+			ArrayList<Attribute> fvWekaAttributes = getAttributes();
+			
+			Instances isTrainingSet = getInstances(fvWekaAttributes);
+			
+			for(FlightWritable flight : flights){
+				
+				Instance iFlight = new DenseInstance(10);
+				
+				iFlight.setValue((Attribute)fvWekaAttributes.get(0), flight.getDayOfMonth()); 
+				iFlight.setValue((Attribute)fvWekaAttributes.get(1), flight.getDayOfWeek()); 
+				iFlight.setValue((Attribute)fvWekaAttributes.get(2), flight.getCarrier().hashCode()); 
+				iFlight.setValue((Attribute)fvWekaAttributes.get(3), flight.getFlightNum()); 
+				iFlight.setValue((Attribute)fvWekaAttributes.get(4), flight.getOriginId()); 
+				iFlight.setValue((Attribute)fvWekaAttributes.get(5), flight.getDestId()); 
+				iFlight.setValue((Attribute)fvWekaAttributes.get(6), flight.getCrsDepartureTime()); 
+				iFlight.setValue((Attribute)fvWekaAttributes.get(7), flight.getCrsArrivalTime()); 
+				
+				iFlight.setValue((Attribute)fvWekaAttributes.get(8), (flight.getHoliday())? "true" : "false"); 
+
+				
+				iFlight.setValue((Attribute)fvWekaAttributes.get(9), flight.getDelay()); 
+				
+				isTrainingSet.add(iFlight);
+				
+			}
+			
+			// Create a naïve bayes classifier
+			 Classifier cModel = (Classifier)new NaiveBayes();
+			 try {
+	
+				cModel.buildClassifier(isTrainingSet);
+				ByteArrayOutputStream output = new ByteArrayOutputStream();
+				weka.core.SerializationHelper.write(output, cModel);
+				context.write(key, new Text(": " + output.toString()));
+				
+				
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			 
+			//context.write(key, cModel);
+			 
+		}
+
+		private ArrayList<Attribute> getAttributes() {
+			
+			ArrayList<Attribute> attributes = new ArrayList<Attribute>(10);
+			
+			/* // Declare the holiday nominal attribute along with its values
+			 ArrayList<String> fvHoliday = new ArrayList<String>(2);
+			 fvHoliday.add("true");
+			 fvHoliday.add("false");*/
+			 Attribute holiday = new Attribute("holiday");
+			 			
+			 // Declare the class attribute along with its values
+			 ArrayList<String> clsDelay = new ArrayList<String>(2);
+			 clsDelay.add("true");
+			 clsDelay.add("false");			 
+			 Attribute delay = new Attribute("delay", clsDelay);
+			
+			//attributes.add(new Attribute("year"));
+			//attributes.add(new Attribute("month"));
+			attributes.add(new Attribute("dayOfMonth"));
+			attributes.add(new Attribute("dayOfWeek"));
+			attributes.add(new Attribute("carrier"));
+			//attributes.add(new Attribute("flightDate"));
+			attributes.add(new Attribute("flightNum"));
+			attributes.add(new Attribute("originId"));
+			attributes.add(new Attribute("destId"));
+			attributes.add(new Attribute("crsDepartureTime"));
+			attributes.add(new Attribute("crsArrivalTime"));	
+			attributes.add(holiday);
+			attributes.add(delay);
+			 
+			 return attributes;
+			 
+		}
+
+		private Instances getInstances(ArrayList<Attribute> attributes) {	
+			 
+			 Instances instance = new Instances("Model", attributes, 0);
+			 
+			 instance.setClassIndex(9);
+			 
+			 return instance;
+		}
+	}
+
+
+	/**
+	 *	Driver Program to run the jobs and set the input and output paths.
+	 */
+	public int run (String[] args) throws Exception {
+		
+		/*if (args.length != 2) {
+			System.out.println("usage: [input_history] [input_test] [input_validate] [output]");
+			System.exit(-1);
+		}*/
+		
+		Job job = Job.getInstance();
+
+		job.setJar("Routing.jar");
+		job.setMapperClass(RoutingMapper.class);
+		job.setReducerClass(RoutingReducer.class);
+		
+		/*Configuration conf = new Configuration();
+		FileSystem fs = FileSystem.getLocal(conf);
+		Path inputPath = fs.makeQualified(new Path("/home/hduser/workspace/A7Prediction/onehistory"));  // local path
+		Path outputPath = fs.makeQualified(new Path("/home/hduser/workspace/A7Prediction/output"));  // local path
+*/
+		job.setMapOutputKeyClass(Text.class);
+		job.setMapOutputValueClass(FlightWritable.class);
+
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(Text.class);
+
+		FileInputFormat.addInputPath(job, new Path(args[0]));
+		FileOutputFormat.setOutputPath(job, new Path(args[1]));
+
+		return job.waitForCompletion(true) ? 0 : 1;
+	}
+
+	public static void main(String[] args) throws Exception {
+
+		System.exit(ToolRunner.run(new Routing(), args));
+	}
+
+}

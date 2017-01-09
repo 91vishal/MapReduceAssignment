@@ -1,0 +1,48 @@
+package com.socket.node;
+
+import java.io.IOException;
+import java.net.Socket;
+import java.io.*;
+
+public class WebClient {
+    public static void main(String[] args) throws IOException {
+    	PrintWriter out = null;
+    	BufferedReader in = null;
+    	String hostName = "localhost";
+    		//Create socket connection
+    		   try{
+    		     Socket socket = new Socket(hostName, 10000);
+    		     out = new PrintWriter(socket.getOutputStream(), 
+    		                 true);
+    		     in = new BufferedReader(new InputStreamReader(
+    		                socket.getInputStream()));
+    		   } catch (UnknownHostException e) {
+    		     System.out.println("Unknown host: kq6py");
+    		     System.exit(1);
+    		   } catch  (IOException e) {
+    		     System.out.println("No I/O");
+    		     System.exit(1);
+    		   }
+    		}
+    	
+    	public void actionPerformed(ActionEvent event){
+    		   Object source = event.getSource();
+
+    		   if(source == button){
+    		//Send data over socket
+    		      String text = textField.getText();
+    		      out.println(text);
+    		      textField.setText(new String(""));
+    		      out.println(text);
+    		   }
+    		//Receive text from server
+    		   try{
+    		     String line = in.readLine();
+    		     System.out.println("Text received: " + line);
+    		   } catch (IOException e){
+    		     System.out.println("Read failed");
+    		     System.exit(1);
+    		   }
+    		}  
+    }
+}

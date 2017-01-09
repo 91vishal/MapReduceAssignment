@@ -1,0 +1,94 @@
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.net.URI;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.TextOutputFormat;
+import org.apache.hadoop.mapred.lib.LazyOutputFormat;
+import org.apache.hadoop.mapred.lib.MultipleOutputs;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.Mapper.Context;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.util.Tool;
+import org.apache.hadoop.util.ToolRunner;
+
+import weka.classifiers.Classifier;
+import weka.classifiers.bayes.NaiveBayes;
+
+public class Request {
+
+public static class RequestMapper extends Mapper<Object, Text, Text, Text> {
+		List<String> requestList = new ArrayList<>();
+		
+	@Override
+	public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+			
+		try{
+			Configuration conf = new Configuration();
+			String line = null;
+			String path = "a7request/";
+			URI uri = new URI(path);
+			FileSystem fs = FileSystem.get(uri, conf);
+			Path requestPath = new Path(path + "04req10k.csv.gz");
+			FSDataInputStream inStream = fs.open(requestPath);
+			ObjectInputStream ois = new ObjectInputStream(inStream);
+			
+			while((line = ois.readUTF()) != null) {
+				int length = line.length();
+				String reskey = line.substring(0,(length-3));
+				System.out.println(reskey + "######### key");
+			
+				
+				context.write(resKey, value);
+			}
+			
+			
+
+		} catch(Exception ex) {
+			System.out.println("Exception in mapper."+ ex);
+		}
+
+	}
+
+	/** Method to Create Mapper output Key
+	 *  @param   String    carrier code, year, airport code
+	 *  @return  String    Mapper output Key
+	 */
+	private Text createKey(String month) {
+		Text returnKey = null;
+		if (!month.isEmpty()) {
+			returnKey = new Text(month);
+		}
+		return returnKey;
+	}
+
+
+	/**
+	 * @param d
+	 * Method takes string date and parses it to yyyy-MM-dd format
+	 * */
+	private static Date convertToDate(String d) throws ParseException {
+		Date date = null;
+		if(!d.isEmpty()){
+
+			date = form.parse(d);
+		}
+		return date;
+	}
+
+}

@@ -1,0 +1,168 @@
+{
+    "OwnerId": "986201705479", 
+    "ReservationId": "r-5f20189a", 
+    "Groups": [], 
+    "Instances": [
+        {
+            "Monitoring": {
+                "State": "disabled"
+            }, 
+            "PublicDnsName": "", 
+            "RootDeviceType": "ebs", 
+            "State": {
+                "Code": 0, 
+                "Name": "pending"
+            }, 
+            "EbsOptimized": false, 
+            "LaunchTime": "2016-03-29T20:41:43.000Z", 
+            "PrivateIpAddress": "172.31.20.148", 
+            "ProductCodes": [], 
+            "VpcId": "vpc-a9d7c1cc", 
+            "StateTransitionReason": "", 
+            "InstanceId": "i-dd53781a", 
+            "ImageId": "ami-c229c0a2", 
+            "PrivateDnsName": "ip-172-31-20-148.us-west-2.compute.internal", 
+            "KeyName": "EC2_KP", 
+            "SecurityGroups": [
+                {
+                    "GroupName": "my-sg", 
+                    "GroupId": "sg-63621604"
+                }
+            ], 
+            "ClientToken": "", 
+            "SubnetId": "subnet-21fd1845", 
+            "InstanceType": "t2.medium", 
+            "NetworkInterfaces": [
+                {
+                    "Status": "in-use", 
+                    "MacAddress": "02:61:21:17:61:f3", 
+                    "SourceDestCheck": true, 
+                    "VpcId": "vpc-a9d7c1cc", 
+                    "Description": "", 
+                    "NetworkInterfaceId": "eni-aa7fc0d1", 
+                    "PrivateIpAddresses": [
+                        {
+                            "PrivateDnsName": "ip-172-31-20-148.us-west-2.compute.internal", 
+                            "Primary": true, 
+                            "PrivateIpAddress": "172.31.20.148"
+                        }
+                    ], 
+                    "PrivateDnsName": "ip-172-31-20-148.us-west-2.compute.internal", 
+                    "Attachment": {
+                        "Status": "attaching", 
+                        "DeviceIndex": 0, 
+                        "DeleteOnTermination": true, 
+                        "AttachmentId": "eni-attach-3e31dfc9", 
+                        "AttachTime": "2016-03-29T20:41:43.000Z"
+                    }, 
+                    "Groups": [
+                        {
+                            "GroupName": "my-sg", 
+                            "GroupId": "sg-63621604"
+                        }
+                    ], 
+                    "SubnetId": "subnet-21fd1845", 
+                    "OwnerId": "986201705479", 
+                    "PrivateIpAddress": "172.31.20.148"
+                }
+            ], 
+            "SourceDestCheck": true, 
+            "Placement": {
+                "Tenancy": "default", 
+                "GroupName": "", 
+                "AvailabilityZone": "us-west-2b"
+            }, 
+            "Hypervisor": "xen", 
+            "BlockDeviceMappings": [], 
+            "Architecture": "x86_64", 
+            "StateReason": {
+                "Message": "pending", 
+                "Code": "pending"
+            }, 
+            "RootDeviceName": "/dev/xvda", 
+            "VirtualizationType": "hvm", 
+            "AmiLaunchIndex": 1
+        }, 
+        {
+            "Monitoring": {
+                "State": "disabled"
+            }, 
+            "PublicDnsName": "", 
+            "RootDeviceType": "ebs", 
+            "State": {
+                "Code": 0, 
+                "Name": "pending"
+            }, 
+            "EbsOptimized": false, 
+            "LaunchTime": "2016-03-29T20:41:43.000Z", 
+            "PrivateIpAddress": "172.31.20.147", 
+            "ProductCodes": [], 
+            "VpcId": "vpc-a9d7c1cc", 
+            "StateTransitionReason": "", 
+            "InstanceId": "i-da53781d", 
+            "ImageId": "ami-c229c0a2", 
+            "PrivateDnsName": "ip-172-31-20-147.us-west-2.compute.internal", 
+            "KeyName": "EC2_KP", 
+            "SecurityGroups": [
+                {
+                    "GroupName": "my-sg", 
+                    "GroupId": "sg-63621604"
+                }
+            ], 
+            "ClientToken": "", 
+            "SubnetId": "subnet-21fd1845", 
+            "InstanceType": "t2.medium", 
+            "NetworkInterfaces": [
+                {
+                    "Status": "in-use", 
+                    "MacAddress": "02:f6:68:7a:4d:ad", 
+                    "SourceDestCheck": true, 
+                    "VpcId": "vpc-a9d7c1cc", 
+                    "Description": "", 
+                    "NetworkInterfaceId": "eni-a97fc0d2", 
+                    "PrivateIpAddresses": [
+                        {
+                            "PrivateDnsName": "ip-172-31-20-147.us-west-2.compute.internal", 
+                            "Primary": true, 
+                            "PrivateIpAddress": "172.31.20.147"
+                        }
+                    ], 
+                    "PrivateDnsName": "ip-172-31-20-147.us-west-2.compute.internal", 
+                    "Attachment": {
+                        "Status": "attaching", 
+                        "DeviceIndex": 0, 
+                        "DeleteOnTermination": true, 
+                        "AttachmentId": "eni-attach-5031dfa7", 
+                        "AttachTime": "2016-03-29T20:41:43.000Z"
+                    }, 
+                    "Groups": [
+                        {
+                            "GroupName": "my-sg", 
+                            "GroupId": "sg-63621604"
+                        }
+                    ], 
+                    "SubnetId": "subnet-21fd1845", 
+                    "OwnerId": "986201705479", 
+                    "PrivateIpAddress": "172.31.20.147"
+                }
+            ], 
+            "SourceDestCheck": true, 
+            "Placement": {
+                "Tenancy": "default", 
+                "GroupName": "", 
+                "AvailabilityZone": "us-west-2b"
+            }, 
+            "Hypervisor": "xen", 
+            "BlockDeviceMappings": [], 
+            "Architecture": "x86_64", 
+            "StateReason": {
+                "Message": "pending", 
+                "Code": "pending"
+            }, 
+            "RootDeviceName": "/dev/xvda", 
+            "VirtualizationType": "hvm", 
+            "AmiLaunchIndex": 0
+        }
+    ]
+}
+

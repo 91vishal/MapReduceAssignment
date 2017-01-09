@@ -1,0 +1,19 @@
+package com.socket.node;
+
+import java.io.IOException;
+import java.io.*;
+import textsock.TextSocket;
+
+public class WebClient {
+    public static void main(String[] args) throws IOException {
+
+        TextSocket conn = new TextSocket("localhost", 10002);
+
+        conn.putln(args[0]);
+
+        //get the response from server
+        System.out.println(conn.getln());            
+
+        conn.close();
+    }
+}

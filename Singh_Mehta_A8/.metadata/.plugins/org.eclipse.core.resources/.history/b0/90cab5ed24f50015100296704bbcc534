@@ -1,0 +1,40 @@
+package com.socket.node;
+
+import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.io.*;
+
+public class WebClient {
+    public static void main(String[] args) throws IOException {
+    	//PrintWriter out = null;
+    	BufferedReader in = null;
+    	String hostName = "localhost";
+    	int port = 10000;
+    		//Create socket connection
+    		   try{
+    		     Socket socket = new Socket(hostName, port);
+    		     out = new PrintWriter(socket.getOutputStream(), 
+    		                 true);
+    		     in = new BufferedReader(new InputStreamReader(
+    		                socket.getInputStream()));
+    		     
+    		     String line = in.readLine();
+    		        if (line == null) {
+    		           System.out.println("No data from server");
+    		        }
+    		        else {
+    		            System.out.println("Data from server " + line);
+    		        }
+    		    
+    		     
+    		   } catch (UnknownHostException e) {
+    		     System.out.println("Unknown host: localhost");
+    		     System.exit(1);
+    		   } catch  (IOException e) {
+    		     System.out.println("No I/O");
+    		     System.exit(1);
+    		   }
+    	}
+}
+    	
