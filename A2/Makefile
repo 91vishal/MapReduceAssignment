@@ -43,7 +43,7 @@ sleep:
 	sleep 30
 
 cluster:
-	aws s3 rm s3://harshali/output --recursive
+	aws s3 rm s3://vishal/output --recursive
 	aws emr create-cluster \
 	--name "CLI Test Cluster" \
 	--release-label emr-4.3.0 \
@@ -57,7 +57,7 @@ cluster:
 	--enable-debugging
 
 getawsdata:
-	aws s3 cp s3://harshali/output result  --recursive  
+	aws s3 cp s3://vishal/output result  --recursive  
 	cat result/part* > finalOutput
 	R < markdown.R --no-save
 	sudo xdg-open plot.png

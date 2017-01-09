@@ -1,13 +1,6 @@
 Pre-Requisites:
 -------------------
 
-Extract Singh_Mehta_A2.tar.gz and Navigate to the folder "Singh_Mehta_A2" containing the Makefile.
-
-## CREDENTIALS FOR AWS ##
-
-ACCESS KEY ID : AKIAJP3NENLAAURSSRKA
-SECRET ACCESS KEY : 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
-
 I. To run locally on Linux
 
 ** Make sure HADOOP_CLASSPATH is set correctly before running command.
