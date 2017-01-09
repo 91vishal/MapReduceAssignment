@@ -1,0 +1,134 @@
+package main
+
+import java.io.IOException
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.conf.Configured
+import org.apache.hadoop.fs.Path
+import org.apache.hadoop.io._
+import org.apache.hadoop.mapreduce.Job
+import org.apache.hadoop.mapreduce._
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat
+import scala.collection.JavaConversions._
+
+/*
+ *  The map reduce program that emits the average
+ * ticket prices for each airline in the year 2015. 
+ * 
+ */
+object DemoComparison {
+	def main(args:Array[String]) {
+		
+		/*if (args.length != 2) {
+			error("Usage: ClusterAnalysis <input-path> <output-path>");
+		}*/
+		val job = Job.getInstance();
+
+		job.setJar("DemoComparison.jar");
+		job.setJobName("DemoComparison");
+
+		//println("------Calling mapper----" );
+		job.setMapperClass(classOf[FlightMapper]);
+		job.setReducerClass(classOf[FlightReducer]);
+		job.setMapOutputKeyClass(classOf[Text]);
+		job.setMapOutputValueClass(classOf[Text]);
+
+		job.setOutputKeyClass(classOf[Text]);
+		job.setOutputValueClass(classOf[Text]);
+
+		FileInputFormat.addInputPath(job, new Path("all"));
+		FileOutputFormat.setOutputPath(job, new Path("out"));
+		job.waitForCompletion(true);
+	}
+	/*
+	 * Mapper program to read the entire data and filter out the flights which
+	 * are not active in the year 2015 and passes the key value pair to the
+	 * reduce program. Key is the carrier code and Value is the Avg. ticket
+	 * price for that particular airline.
+	 * 
+	 */
+	 class FlightMapper extends Mapper[Object, Text, Text, Text] {
+			type Context = Mapper[Object, Text, Text, Text]#Context
+		 
+		override def map(_K : Object, value : Text, context : Context) {
+			//println("In Map");
+			var line = value.toString();
+			var carrierCode = new String();
+			var avgTicketPrice = new String();
+			var year = 0;
+			var month = new String();
+			var nullCheck = true;
+			var replaceline = line.replace(", ", "?");
+			
+			var row = new Array[String](120);	
+			row = replaceline.split(",");
+
+			try {
+				year = Integer.parseInt(row(0));
+			} catch {
+				case ex: NumberFormatException => {
+				nullCheck = false;
+				}	
+			}
+
+			if (row.length == 110 && year == 2015 && nullCheck) {
+				carrierCode = row(6);
+				avgTicketPrice = row(109);
+				month = row(2);
+
+				var outKey = new Text();
+				var outValue = new Text();
+
+				outKey = createKey(carrierCode, month);
+				outValue = createValue(avgTicketPrice);
+				
+				context.write(outKey, outValue);
+			}
+
+		}
+
+		def createKey(carrier : String, month : String) : Text = {
+			
+			var returnKey = new Text();
+			if (!carrier.isEmpty() && !month.isEmpty()) {
+				returnKey = new Text(carrier.trim() + "\t" + month.trim());
+			}
+			return returnKey;
+			}		
+		
+
+		def createValue(avgPrice : String) : Text = {
+			var returnValue = new Text();
+			if (!avgPrice.isEmpty()) {
+				returnValue = new Text(avgPrice);
+			}
+			return returnValue;
+		}	
+}
+
+	/*
+	 * Reducer program to emit the consolidated avg. ticket prices for each
+	 * airline in the year 2015. It takes the key value pair from the mapper.
+	 * key is the carrier code and Value is the avg. ticket prices for the
+	 * airline.
+	 * 
+	 */
+	class FlightReducer extends Reducer[Text, Text, Text, Text] {
+		type Context = Reducer[Text, Text, Text, Text]#Context
+		
+		 override def reduce(_K : Text, values: java.lang.Iterable[Text], context: Context) {
+			//println("In reduce");
+			
+			var sum = 0.0;
+			var count = 0;
+			for (value <- values) {
+				sum = sum + (value.toString()).toFloat;
+				count += 1;
+			}
+
+			var avg = (sum / count).toFloat ;
+			context.write(_K, new Text(count + "\t" + String.valueOf(avg)));
+		}
+	}
+
+}
